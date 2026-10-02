@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lummo Store</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--good:#15803d;--danger:#dc2626}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+button,input,textarea,select{font:inherit}button{cursor:pointer;border:0}.wrap{max-width:1100px;margin:auto;padding:0 16px}
+header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line)}
+.nav{height:64px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:24px;font-weight:900;letter-spacing:-1px}.navlinks{display:flex;gap:6px}.navlinks button{background:transparent;padding:9px 10px;border-radius:10px}.navlinks button:hover{background:#f1f5f9}
+.hero{padding:38px 0 24px}.hero h1{font-size:clamp(32px,7vw,58px);line-height:1;margin:0 0 12px}.hero p{color:var(--muted);max-width:650px;margin:0 0 20px}.btn{background:var(--accent);color:#fff;padding:12px 16px;border-radius:12px;font-weight:700}.btn.alt{background:#fff;color:var(--text);border:1px solid var(--line)}
+.section{padding:24px 0}.section h2{margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}.pic{height:190px;display:grid;place-items:center;background:linear-gradient(135deg,#eef2ff,#f8fafc);font-size:74px}.body{padding:14px}.name{font-weight:800}.muted{color:var(--muted);font-size:14px}.price{font-size:20px;font-weight:900;margin:8px 0}.old{text-decoration:line-through;color:#9ca3af;font-size:13px;margin-left:6px}.full{width:100%}
+.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0}.form{display:grid;gap:11px}.form input,.form textarea,.form select{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:11px;background:#fff}.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.cartrow{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:12px 0}.qty{display:flex;align-items:center;gap:8px}.qty button{width:30px;height:30px;border-radius:8px;background:#eef2f7}
+.total{display:flex;justify-content:space-between;font-size:20px;font-weight:900;padding:15px 0}.hidden{display:none!important}.status{display:inline-block;padding:6px 9px;border-radius:999px;background:#ecfdf5;color:var(--good);font-size:12px;font-weight:800}.danger{color:var(--danger)}.adminnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:11px 15px;border-radius:12px;z-index:50;display:none}
+footer{padding:35px 0;color:var(--muted);text-align:center}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.pic{height:150px}.navlinks button{padding:8px 6px;font-size:13px}}
+@media(max-width:520px){.two{grid-template-columns:1fr}.navlinks button:nth-child(1){display:none}.grid{gap:10px}.pic{height:135px;font-size:58px}.body{padding:11px}.hero{padding-top:28px}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <div class="brand">Lummo</div>
+  <div class="navlinks">
+    <button onclick="show('home')">Home</button><button onclick="show('shop')">Shop</button>
+    <button onclick="show('track')">Track</button><button onclick="show('admin')">Admin</button>
+    <button onclick="show('cart')">🛒 <span id="cartCount">0</span></button>
+  </div>
+</div></header>
+
+<main class="wrap">
+<section id="home" class="page">
+  <div class="hero"><h1>Simple things.<br>Better style.</h1>
+  <p>Welcome to Lummo — a simple online store. Shop useful products with COD and UPI payment.</p>
+  <button class="btn" onclick="show('shop')">Shop now</button></div>
+  <div class="section"><h2>Featured</h2><div id="featured" class="grid"></div></div>
+</section>
+
+<section id="shop" class="page hidden">
+  <div class="section"><h2>Shop</h2><div id="products" class="grid"></div></div>
+</section>
+
+<section id="cart" class="page hidden">
+  <div class="section"><h2>Your Cart</h2><div id="cartBox"></div></div>
+</section>
+
+<section id="checkout" class="page hidden">
+  <div class="section"><h2>Checkout</h2>
+    <div class="panel">
+      <form id="checkoutForm" class="form">
+        <div class="two"><input id="cname" required placeholder="Full name"><input id="phone" required placeholder="Phone number" inputmode="tel"></div>
+        <textarea id="address" required rows="3" placeholder="Full delivery address"></textarea>
+        <div class="two"><input id="pin" required placeholder="Pincode" inputmode="numeric"><select id="payment"><option value="COD">Cash on Delivery</option><option value="UPI">UPI QR</option></select></div>
+        <div id="qrBox" class="panel hidden"></div>
+        <div id="checkoutTotal"></div>
+        <button class="btn" type="submit">Place Order</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="track" class="page hidden">
+  <div class="section"><h2>Track Order</h2>
+    <div class="panel">
+      <div class="form"><input id="trackId" placeholder="Enter Order ID e.g. LM-123456"><button class="btn" onclick="trackOrder()">Track</button></div>
+    </div>
+    <div id="trackResult"></div>
+  </div>
+</section>
+
+<section id="admin" class="page hidden">
+  <div class="section"><h2>Admin</h2>
+    <div id="adminLogin" class="panel"><p class="muted">Demo admin login. Production security requires a real backend.</p><div class="form"><input id="adminPin" type="password" placeholder="Admin PIN"><button class="btn" onclick="loginAdmin()">Login</button></div></div>
+    <div id="adminPanel" class="hidden">
+      <div class="adminnav"><button class="btn" onclick="adminTab('productsAdmin')">Products</button><button class="btn alt" onclick="adminTab('ordersAdmin')">Orders</button><button class="btn alt" onclick="adminTab('settingsAdmin')">Settings</button><button class="btn alt" onclick="logoutAdmin()">Logout</button></div>
+      <div id="productsAdmin" class="panel"></div><div id="ordersAdmin" class="panel hidden"></div><div id="settingsAdmin" class="panel hidden"></div>
+    </div>
+  </div>
+</section>
+</main>
+<footer>Lummo © 2026</footer>
+<div id="toast" class="toast"></div>
+
+<script>
+const defaultProducts=[
+ {id:1,name:"Minimal Desk Clock",price:279,old:399,icon:"⏰",stock:20,desc:"Clean modern desk clock."},
+ {id:2,name:"LED Digital Clock",price:349,old:499,icon:"🕐",stock:20,desc:"Simple digital style clock."},
+ {id:3,name:"Classic Wall Clock",price:399,old:599,icon:"🕰️",stock:15,desc:"Classic look for home."},
+ {id:4,name:"Mini Alarm Clock",price:249,old:349,icon:"⏱️",stock:25,desc:"Compact alarm clock."}
+];
+const get=(k,d)=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
+let products=get("lummo_products",defaultProducts), cart=get("lummo_cart",[]), orders=get("lummo_orders",[]);
+let upiQr=localStorage.getItem("lummo_qr")||"";
+
+function save(){localStorage.setItem("lummo_products",JSON.stringify(products));localStorage.setItem("lummo_cart",JSON.stringify(cart));localStorage.setItem("lummo_orders",JSON.stringify(orders));}
+function money(n){return "₹"+Number(n).toLocaleString("en-IN")}
+function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
+function show(id){document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));document.getElementById(id).classList.remove("hidden");if(id==="shop"||id==="home")renderProducts();if(id==="cart")renderCart();if(id==="checkout")renderCheckout();window.scrollTo({top:0,behavior:"smooth"})}
+function renderProducts(){
+ const html=products.map(p=>`<div class="card"><div class="pic">${p.icon||"📦"}</div><div class="body"><div class="name">${esc(p.name)}</div><div class="muted">${esc(p.desc||"")}</div><div class="price">${money(p.price)} <span class="old">${money(p.old||p.price)}</span></div><button class="btn full" onclick="addCart(${p.id})">Add to Cart</button></div></div>`).join("");
+ document.getElementById("products").innerHTML=html;document.getElementById("featured").innerHTML=products.slice(0,4).map(p=>`<div class="card"><div class="pic">${p.icon||"📦"}</div><div class="body"><div class="name">${esc(p.name)}</div><div class="price">${money(p.price)}</div><button class="btn full" onclick="addCart(${p.id})">Add to Cart</button></div></div>`).join("");
+ updateCount();
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function addCart(id){let x=cart.find(i=>i.id===id);x?x.qty++:cart.push({id,qty:1});save();updateCount();toast("Added to cart");}
+function updateCount(){document.getElementById("cartCount").textContent=cart.reduce((a,b)=>a+b.qty,0)}
+function renderCart(){
+ let total=0;
+ if(!cart.length){document.getElementById("cartBox").innerHTML='<div class="panel">Cart empty 😌</div>';return}
+ let rows=cart.map(i=>{let p=products.find(x=>x.id===i.id);if(!p)return "";let sub=p.price*i.qty;total+=sub;return `<div class="cartrow"><div><b>${esc(p.name)}</b><div class="muted">${money(p.price)} × ${i.qty}</div></div><div class="qty"><button onclick="changeQty(${i.id},-1)">−</button><b>${i.qty}</b><button onclick="changeQty(${i.id},1)">+</button></div></div>`}).join("");
+ document.getElementById("cartBox").innerHTML=`<div class="panel">${rows}<div class="total"><span>Total</span><span>${money(total)}</span></div><button class="btn full" onclick="show('checkout')">Checkout</button></div>`;
+}
+function changeQty(id,n){let x=cart.find(i=>i.id===id);if(!x)return;x.qty+=n;if(x.qty<=0)cart=cart.filter(i=>i.id!==id);save();renderCart();updateCount()}
+function renderCheckout(){
+ let total=cart.reduce((s,i)=>s+(products.find(p=>p.id===i.id)?.price||0)*i.qty,0);
+ document.getElementById("checkoutTotal").innerHTML=`<div class="total"><span>Total</span><span>${money(total)}</span></div>`;
+ showQr();
+}
+document.getElementById("payment").addEventListener("change",showQr);
+function showQr(){let b=document.getElementById("qrBox");if(document.getElementById("payment").value==="UPI"){b.classList.remove("hidden");b.innerHTML=upiQr?`<img src="${upiQr}" style="width:220px;max-width:100%;display:block;margin:auto"><p class="muted">UPI payment cheythu order place cheyyuka.</p>`:`<p><b>UPI QR not added yet.</b><br>Admin → Settings il QR upload cheyyuka.</p>`}else b.classList.add("hidden")}
+document.getElementById("checkoutForm").addEventListener("submit",e=>{
+ e.preventDefault();if(!cart.length)return toast("Cart empty");
+ let id="LM-"+Math.floor(100000+Math.random()*900000);
+ let total=cart.reduce((s,i)=>s+(products.find(p=>p.id===i.id)?.price||0)*i.qty,0);
+ orders.unshift({id,date:new Date().toLocaleString(),name:cname.value,phone:phone.value,address:address.value,pin:pin.value,payment:payment.value,items:cart.map(i=>({...i})),total,status:"Order Confirmed",tracking:""});
+ save();cart=[];save();updateCount();document.getElementById("checkoutForm").reset();toast("Order placed");document.getElementById("trackId").value=id;show("track");trackOrder();
+});
+function trackOrder(){let id=document.getElementById("trackId").value.trim().toUpperCase(),o=orders.find(x=>x.id===id),r=document.getElementById("trackResult");if(!o){r.innerHTML='<div class="panel">Order not found.</div>';return}r.innerHTML=`<div class="panel"><h3>${o.id}</h3><p><span class="status">${esc(o.status)}</span></p><p><b>Total:</b> ${money(o.total)}</p><p><b>Payment:</b> ${esc(o.payment)}</p><p><b>Tracking/AWB:</b> ${o.tracking?esc(o.tracking):"Not added yet"}</p><p class="muted">Order placed: ${esc(o.date)}</p></div>`}
+function loginAdmin(){if(document.getElementById("adminPin").value==="1234"){sessionStorage.setItem("lummo_admin","1");openAdmin();toast("Admin login success")}else toast("Wrong PIN")}
+function openAdmin(){if(sessionStorage.getItem("lummo_admin")==="1"){document.getElementById("adminLogin").classList.add("hidden");document.getElementById("adminPanel").classList.remove("hidden");renderAdminProducts();renderAdminOrders();renderSettings()}}
+function logoutAdmin(){sessionStorage.removeItem("lummo_admin");location.reload()}
+function adminTab(id){["productsAdmin","ordersAdmin","settingsAdmin"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id))}
+function renderAdminProducts(){
+ document.getElementById("productsAdmin").innerHTML=`<h3>Products</h3><form class="form" onsubmit="addProduct(event)"><input id="pn" required placeholder="Product name"><input id="pp" required type="number" placeholder="Price"><input id="po" type="number" placeholder="Old price"><input id="pi" placeholder="Icon/emoji (e.g. ⏰)"><input id="ps" type="number" placeholder="Stock"><input id="pd" placeholder="Description"><button class="btn">Add Product</button></form><hr>${products.map(p=>`<div class="cartrow"><div><b>${esc(p.name)}</b><div class="muted">${money(p.price)} · stock ${p.stock}</div></div><button class="btn" onclick="delProduct(${p.id})">Delete</button></div>`).join("")}`;
+}
+function addProduct(e){e.preventDefault();products.push({id:Date.now(),name:pn.value,price:Number(pp.value),old:Number(po.value)||Number(pp.value),icon:pi.value||"📦",stock:Number(ps.value)||0,desc:pd.value});save();renderAdminProducts();renderProducts();e.target.reset();toast("Product added")}
+function delProduct(id){if(confirm("Delete product?")){products=products.filter(p=>p.id!==id);save();renderAdminProducts();renderProducts()}}
+function renderAdminOrders(){
+ document.getElementById("ordersAdmin").innerHTML=`<h3>Orders</h3>${orders.length?orders.map(o=>`<div class="panel"><b>${o.id}</b><p>${esc(o.name)} · ${esc(o.phone)} · ${money(o.total)}</p><p class="muted">${esc(o.address)}, ${esc(o.pin)}</p><div class="two"><select id="st-${o.id}"><option ${o.status==="Order Confirmed"?"selected":""}>Order Confirmed</option><option ${o.status==="Packed"?"selected":""}>Packed</option><option ${o.status==="Shipped"?"selected":""}>Shipped</option><option ${o.status==="Out for Delivery"?"selected":""}>Out for Delivery</option><option ${o.status==="Delivered"?"selected":""}>Delivered</option></select><input id="tr-${o.id}" value="${esc(o.tracking)}" placeholder="Meesho Tracking/AWB"></div><button class="btn" style="margin-top:10px" onclick="updateOrder('${o.id}')">Update</button></div>`).join(""):'<p class="muted">No orders yet.</p>'}`;
+}
+function updateOrder(id){let o=orders.find(x=>x.id===id);if(!o)return;o.status=document.getElementById("st-"+id).value;o.tracking=document.getElementById("tr-"+id).value;save();renderAdminOrders();toast("Order updated")}
+function renderSettings(){document.getElementById("settingsAdmin").innerHTML=`<h3>UPI QR</h3><p class="muted">Your QR image is stored only in this browser in this demo version.</p><input id="qrFile" type="file" accept="image/*"><div style="margin-top:12px">${upiQr?'<img src="'+upiQr+'" style="width:180px;max-width:100%"><br><button class="btn" onclick="removeQr()">Remove QR</button>':'No QR uploaded yet.'}</div>`;document.getElementById("qrFile").addEventListener("change",function(){let f=this.files[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{upiQr=rd.result;localStorage.setItem("lummo_qr",upiQr);renderSettings();toast("QR saved")};rd.readAsDataURL(f)})}
+function removeQr(){upiQr="";localStorage.removeItem("lummo_qr");renderSettings()}
+renderProducts();openAdmin();
+</script>
+</body>
+</html>
